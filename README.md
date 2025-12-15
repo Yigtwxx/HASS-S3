@@ -1,40 +1,40 @@
 # HASS-S3
-This custom integration provides a service for interacting with S3 including uploading files to a bucket or copying them within and between buckets.
+Bu özel entegrasyon, S3 ile etkileşim kurmak, dosya yüklemek veya dosyaları bucket'lar içinde ve arasında kopyalamak için bir servis sağlar.
 
-Create your S3 bucket via the AWS console, remember bucket names must be unique. I created a bucket with the default access settings (allpublic OFF) and created a bucket name with format `my-bucket-ransom_number` with `random_number` generated [on this website](https://onlinehashtools.com/generate-random-md5-hash).
+S3 bucket'ınızı AWS konsolu üzerinden oluşturun, bucket isimlerinin benzersiz olması gerektiğini unutmayın. Ben varsayılan erişim ayarlarıyla (tüm public erişimler KAPALI) bir bucket oluşturdum ve bucket ismini `my-bucket-random_number` formatında, `random_number` kısmını [bu web sitesinde](https://onlinehashtools.com/generate-random-md5-hash) oluşturarak belirledim.
 
-**Note** for a local and self-hosted alternative checkout the official [Minio integration](https://www.home-assistant.io/integrations/minio/).
+**Not:** Yerel ve kendi sunucunuzda barındırılan (self-hosted) bir alternatif için resmi [Minio entegrasyonuna](https://www.home-assistant.io/integrations/minio/) göz atın.
 
-## Installation and configuration
-Place the `custom_components` folder in your configuration directory (or add its contents to an existing custom_components folder). Add to your Home Assistant configuration UI or add to your `configuration.yaml`:
+## Kurulum ve yapılandırma
+`custom_components` klasörünü yapılandırma dizinize yerleştirin (veya içeriğini mevcut `custom_components` klasörüne ekleyin). Home Assistant yapılandırma arayüzüne veya `configuration.yaml` dosyanıza ekleyin:
 ```yaml
 s3:
   aws_access_key_id: AWS_ACCESS_KEY
   aws_secret_access_key: AWS_SECRET_KEY
-  region_name: eu-west-1 # optional region, default is us-east-1
+  region_name: eu-west-1 # isteğe bağlı bölge, varsayılan us-east-1
 ```
 
-## Services
-### Put Service
-The s3 entity exposes a `put` service for uploading files to S3.
+## Servisler
+### Put Servisi
+S3 varlığı (entity), S3'e dosya yüklemek için bir put servisi sunar.
 
-Example data for service call:
-
+Servis çağrısı için örnek veri:
 ```
 {
   "bucket": "my_bucket",
   "key": "my_key/file.jpg",
   "file_path": "/some/path/file.jpg",
-  "storage_class": "STANDARD_IA" # optional
-  "content_type" : "image/jpeg" # optional
-  "tags":  "tag1=aTagValue&tag2=anotherTagValue" # optional
+  "storage_class": "STANDARD_IA" # isteğe bağlı
+  "content_type" : "image/jpeg" # isteğe bağlı
+  "tags":  "tag1=aTagValue&tag2=anotherTagValue" # isteğe bağlı
 }
 ```
 
-### Copy Service
-The s3 entity exposes a `copy` service for moving files around in S3.
+### Copy Servisi
+S3 varlığı (entity), S3 içindeki dosyaları taşımak için bir copy servisi sunar.
 
-Example data for service call:
+Servis çağrısı için örnek veri:
+
 ```
 {
   "bucket": "my_bucket",
@@ -43,7 +43,7 @@ Example data for service call:
 }
 ```
 
-If you need to move items between buckets use this syntax:
+Öğeleri bucket'lar arasında taşımanız gerekirse bu sözdizimini kullanın:
 ```
 {
   "bucket_source": "my_source_bucket",
@@ -53,10 +53,10 @@ If you need to move items between buckets use this syntax:
 }
 ```
 
-### Delete Service
-The s3 entity exposes a `delete` service for deleting files (objects) from S3.
+### Delete Servisi
+S3 varlığı (entity), S3'ten dosya (nesne) silmek için bir delete servisi sunar.
 
-Example data for service call:
+Servis çağrısı için örnek veri:
 ```
 {
   "bucket": "my_bucket",
@@ -64,10 +64,10 @@ Example data for service call:
 }
 ```
 
-### Sign URL Service
-The S3 entity exposes a `signurl` service for generating pre-signed URLs with a defined validity period for accessing content already stored in S3 with a URL.  Run this action after you call the S3 copy service.  This service generates an event of type s3_signed_url which you can use as a trigger in a subsequent automation.  The event data returns a key-value pair of URL and the pre-signed URL.
+### Sign URL Servisi
+S3 varlığı (entity), halihazırda S3'te depolanan içeriğe bir URL ile erişmek için, tanımlı bir geçerlilik süresine sahip önceden imzalanmış (pre-signed) URL'ler oluşturmak adına bir signurl servisi sunar. Bu eylemi S3 copy servisini çağırdıktan sonra çalıştırın. Bu servis, sonraki bir otomasyonda tetikleyici olarak kullanabileceğiniz s3_signed_url türünde bir olay (event) oluşturur. Olay verisi, URL ve önceden imzalanmış URL'den oluşan bir anahtar-değer çifti döndürür.
 
-Example data for service call:
+Servis çağrısı için örnek veri:
 ```
 {
   "bucket": "my_bucket",
@@ -77,8 +77,8 @@ Example data for service call:
 ```
 
 
-## Example automation
-The following automation uses the [folder_watcher](https://www.home-assistant.io/integrations/folder_watcher/) to automatically upload files created in the local filesystem to S3:
+## Örnek otomasyon
+Aşağıdaki otomasyon, yerel dosya sisteminde oluşturulan dosyaları otomatik olarak S3'e yüklemek için [folder_watcher](https://www.home-assistant.io/integrations/folder_watcher/) kullanır:
 
 ```yaml
 - id: '1587784389530'
@@ -97,7 +97,7 @@ The following automation uses the [folder_watcher](https://www.home-assistant.io
       file_path: "{{ trigger.event.data.path }}"
       storage_class: "STANDARD_IA"
 ```
-Note you must configure `folder_watcher`.
+Not: `folder_watcher`'ı yapılandırmanız gerekir.
 
-## Accessing S3
-I recommend [Filezilla](https://filezilla-project.org/) for connecting to your S3 bucket, free version is available.
+## S3'e Erişim
+S3 bucket'ınıza bağlanmak için [Filezilla](https://filezilla-project.org/) öneririm, ücretsiz sürümü mevcuttur.
